@@ -1,7 +1,7 @@
 # Личный проект «Кекстаграм» [![Build status][travis-image]][travis-url]
 
 * Студент: [Иван Жуков](https://up.htmlacademy.ru/javascript/14/user/671871).
-* Наставник: `Неизвестно`.
+* Наставник: [Александр Сушко](https://up.htmlacademy.ru/javascript/14/user/281347).
 
 ---
 
