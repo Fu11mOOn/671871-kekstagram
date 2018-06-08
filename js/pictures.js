@@ -19,27 +19,27 @@ var COMMENTS_LIST = [
 var NUMBER_OF_PICTURES = 25;
 var ELEMENT_NUMBER = 0;
 
-var getRandomNumber = function (min, max) {
+var getRandomInteger = function (min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 };
 var generateUsersPictures = function (descriptionsList, commentsList, numberOfPictures) {
   var usersPictures = [];
 
-  var generateUsersComments = function () {
-    for (var j = 0; j < getRandomNumber(1, 3); j++) {
-      usersPictures[i].comments[j] = commentsList[getRandomNumber(0, commentsList.length)];
+  var generateUsersComments = function (array) {
+    for (var j = 0; j < getRandomInteger(1, 3); j++) {
+      array.comments[j] = commentsList[getRandomInteger(0, commentsList.length)];
     }
   };
 
   for (var i = 0; i < numberOfPictures; i++) {
     usersPictures[i] = {
       url: 'photos/' + (i + 1) + '.jpg',
-      likes: getRandomNumber(15, 201),
+      likes: getRandomInteger(15, 201),
       comments: [],
-      description: descriptionsList[getRandomNumber(0, descriptionsList.length)]
+      description: descriptionsList[getRandomInteger(0, descriptionsList.length)]
     };
 
-    generateUsersComments();
+    generateUsersComments(usersPictures[i]);
   }
 
   return usersPictures;
@@ -66,20 +66,20 @@ var pasteUsersPictures = function (array) {
 };
 var renderBigPicture = function (array, elementNumber) {
   var bigPicture = document.querySelector('.big-picture');
-  var commentTemplate = document.querySelector('.social__comment').cloneNode(true);
-  var imageElement = commentTemplate.querySelector('.social__picture');
-  var commentsList = document.querySelector('.social__comments');
-  var fragment = document.createDocumentFragment();
 
-  // Здесь я решил это в функцию занести, чтобы по названию было понятнее, что там происходит. В правильном направлении мыслю? И если в функции есть функция, то нужные для нее переменные (при условии, что после нее они не используются) лучше писать в ней или в функции, которая ее содержит?
   var renderBigPictureComments = function () {
-    commentTemplate.classList.add('social__comment--text');
+    var commentsList = document.querySelector('.social__comments');
+    var fragment = document.createDocumentFragment();
+
 
     for (var i = 0; i < array[elementNumber].comments.length; i++) {
-      imageElement.src = 'img/avatar-' + getRandomNumber(1, 7) + '.svg';
+      var commentTemplate = document.querySelector('.social__comment').cloneNode(true);
+      var imageElement = commentTemplate.querySelector('.social__picture');
+
+      commentTemplate.classList.add('social__comment--text');
+      imageElement.src = 'img/avatar-' + getRandomInteger(1, 7) + '.svg';
       commentTemplate.textContent = array[elementNumber].comments[i];
       commentTemplate.insertBefore(imageElement, commentTemplate.firstChild);
-      // Здесь почему-то сommentTemplate не добавляется в конец fragment, а перезаписвает его, если итерации больше одной
       fragment.appendChild(commentTemplate);
     }
 
