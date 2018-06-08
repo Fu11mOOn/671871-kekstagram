@@ -19,24 +19,24 @@ var COMMENTS_LIST = [
 var NUMBER_OF_PICTURES = 25;
 var ELEMENT_NUMBER = 0;
 
-var getRandomInteger = function (min, max) {
+var getRandomIntegerFromInterval = function (min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 };
 var generateUsersPictures = function (descriptionsList, commentsList, numberOfPictures) {
   var usersPictures = [];
 
   var generateUsersComments = function (array) {
-    for (var j = 0; j < getRandomInteger(1, 3); j++) {
-      array.comments[j] = commentsList[getRandomInteger(0, commentsList.length)];
+    for (var j = 0; j < getRandomIntegerFromInterval(1, 3); j++) {
+      array.comments[j] = commentsList[getRandomIntegerFromInterval(0, commentsList.length)];
     }
   };
 
   for (var i = 0; i < numberOfPictures; i++) {
     usersPictures[i] = {
       url: 'photos/' + (i + 1) + '.jpg',
-      likes: getRandomInteger(15, 201),
+      likes: getRandomIntegerFromInterval(15, 201),
       comments: [],
-      description: descriptionsList[getRandomInteger(0, descriptionsList.length)]
+      description: descriptionsList[getRandomIntegerFromInterval(0, descriptionsList.length)]
     };
 
     generateUsersComments(usersPictures[i]);
@@ -77,7 +77,7 @@ var renderBigPicture = function (array, elementNumber) {
       var imageElement = commentTemplate.querySelector('.social__picture');
 
       commentTemplate.classList.add('social__comment--text');
-      imageElement.src = 'img/avatar-' + getRandomInteger(1, 7) + '.svg';
+      imageElement.src = 'img/avatar-' + getRandomIntegerFromInterval(1, 7) + '.svg';
       commentTemplate.textContent = array[elementNumber].comments[i];
       commentTemplate.insertBefore(imageElement, commentTemplate.firstChild);
       fragment.appendChild(commentTemplate);
