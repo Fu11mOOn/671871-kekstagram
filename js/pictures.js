@@ -26,8 +26,12 @@ var generateUsersPictures = function (descriptionsList, commentsList, numberOfPi
   var usersPictures = [];
 
   var generateUsersComments = function (array) {
-    for (var j = 0; j < getRandomIntegerFromInterval(1, 3); j++) {
-      array.comments[j] = commentsList[getRandomIntegerFromInterval(0, commentsList.length)];
+    for (var i = 0; i < 2; i++) {
+      array.comments[i] = [];
+
+      for (var j = 0; j < getRandomIntegerFromInterval(1, 3); j++) {
+        array.comments[i] += commentsList[getRandomIntegerFromInterval(0, commentsList.length)] + ' ';
+      }
     }
   };
 
