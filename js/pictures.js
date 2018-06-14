@@ -171,8 +171,8 @@ var impositionOfEffectOnPicture = function () {
   };
   // Просто заготовка для будущей функции изменения насыщенности эффекта
   var changeEffectIntensity = function () {
-    var sliderOfEffectIntensity = document.querySelector('.scale__pin');
-    var sliderContainer = document.querySelector('.img-upload__scale')
+    // var sliderOfEffectIntensity = document.querySelector('.scale__pin');
+    var sliderContainer = document.querySelector('.img-upload__scale');
 
     if (picturePreview.classList.contains(ORIGINAL_PICTURE_CLASS)) {
       sliderContainer.classList.add('hidden');
