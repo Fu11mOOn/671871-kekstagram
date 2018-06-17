@@ -27,6 +27,16 @@ var EFFECT_CLASSES = [
 var NUMBER_OF_PICTURES = 25;
 var ESC_KEYCODE = 27;
 var ORIGINAL_PICTURE_CLASS = 'effects__preview--none';
+var STEP_OF_CHANGE_SIZE_OF_PICTURE_PREVIEW = 25;
+var MIN_SIZE_OF_PICTURE_PREVIEW = 25;
+var MAX_SIZE_OF_PICTURE_PREVIEW = 100;
+
+var commentCount = document.querySelector('.social__comment-count');
+var commentLoadMore = document.querySelector('.social__loadmore');
+var pictureUpload = document.querySelector('#upload-file');
+var pictureEditor = document.querySelector('.img-upload__overlay');
+var pictureEditorCloseButton = document.querySelector('.img-upload__cancel');
+var isFirstOpenOfEditor = true;
 
 var getRandomIntegerFromInterval = function (min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
@@ -57,21 +67,21 @@ var generateUsersPictures = function (descriptionsList, commentsList, numberOfPi
 
   return usersPictures;
 };
-var pasteUsersPictures = function (array) {
+var pasteUsersPictures = function () {
+  var usersPictures = generateUsersPictures(DESCRIPTIONS_LIST, COMMENTS_LIST, NUMBER_OF_PICTURES);
   var usersPicturesList = document.querySelector('.pictures');
   var fragment = document.createDocumentFragment();
 
   var renderUserPicture = function (element) {
-    var userPictureTemplate = document.querySelector('#picture').content.cloneNode(true);
-    var pictureLink = userPictureTemplate.querySelector('.picture__link');
+    var userPictureTemplate = document.querySelector('#picture').content.querySelector('.picture__link').cloneNode(true);
 
     var onUserPictureClick = function (evt) {
       evt.preventDefault();
       renderBigPicture(element);
     };
 
-    pictureLink.href = element.url;
-    pictureLink.addEventListener('click', onUserPictureClick);
+    userPictureTemplate.href = element.url;
+    userPictureTemplate.addEventListener('click', onUserPictureClick);
     userPictureTemplate.querySelector('.picture__img').src = element.url;
     userPictureTemplate.querySelector('.picture__stat--likes').textContent = element.likes;
     userPictureTemplate.querySelector('.picture__stat--comments').textContent = element.comments.length;
@@ -79,7 +89,7 @@ var pasteUsersPictures = function (array) {
     return userPictureTemplate;
   };
 
-  for (var i = 0; i < array.length; i++) {
+  for (var i = 0; i < usersPictures.length; i++) {
     fragment.appendChild(renderUserPicture(usersPictures[i]));
   }
 
@@ -152,11 +162,44 @@ var impositionOfEffectsOnPicturePreview = function () {
         }
       }
 
-      changeEffectIntensity();
+      editEffectIntensity();
+    });
+  };
+  var editSizeOfPicturePreview = function () {
+    var sizeUpButton = document.querySelector('.resize__control--plus');
+    var sizeDownButton = document.querySelector('.resize__control--minus');
+    var sizeInput = document.querySelector('.resize__control--value');
+    var currentSize = MAX_SIZE_OF_PICTURE_PREVIEW;
+
+    sizeInput.value = MAX_SIZE_OF_PICTURE_PREVIEW + '%';
+    sizeUpButton.addEventListener('click', function () {
+      if (currentSize < MAX_SIZE_OF_PICTURE_PREVIEW) {
+        currentSize += STEP_OF_CHANGE_SIZE_OF_PICTURE_PREVIEW;
+        sizeInput.value = currentSize + '%';
+        picturePreview.style.transform = 'scale(0.' + currentSize + ')';
+      }
+      if (currentSize >= MAX_SIZE_OF_PICTURE_PREVIEW) {
+        currentSize = MAX_SIZE_OF_PICTURE_PREVIEW;
+        sizeInput.value = currentSize + '%';
+        picturePreview.style.transform = '';
+      }
+    });
+    sizeDownButton.addEventListener('click', function () {
+      if (currentSize > MIN_SIZE_OF_PICTURE_PREVIEW) {
+        currentSize -= STEP_OF_CHANGE_SIZE_OF_PICTURE_PREVIEW;
+        sizeInput.value = currentSize + '%';
+        picturePreview.style.transform = 'scale(0.' + currentSize + ')';
+
+      }
+      if (currentSize <= MIN_SIZE_OF_PICTURE_PREVIEW) {
+        currentSize = MIN_SIZE_OF_PICTURE_PREVIEW;
+        sizeInput.value = currentSize + '%';
+        picturePreview.style.transform = 'scale(0.' + currentSize + ')';
+      }
     });
   };
   // Просто заготовка для будущей функции изменения насыщенности эффекта
-  var changeEffectIntensity = function () {
+  var editEffectIntensity = function () {
     // var sliderOfEffectIntensity = document.querySelector('.scale__pin');
     var sliderContainer = document.querySelector('.img-upload__scale');
 
@@ -173,9 +216,10 @@ var impositionOfEffectsOnPicturePreview = function () {
     for (var i = 0; i < pictureEffects.length; i++) {
       changeClassOfPicturePreviewWhenPressedOnEffect(pictureEffects[i], pictureEffectsInput[i]);
     }
-  }
 
-  changeEffectIntensity();
+    editEffectIntensity();
+    editSizeOfPicturePreview();
+  }
 };
 var onPictureEditorClose = function () {
   pictureEditor.classList.add('hidden');
@@ -189,15 +233,7 @@ var onPictureEditorEscPressed = function (evt) {
   }
 };
 
-var usersPictures = generateUsersPictures(DESCRIPTIONS_LIST, COMMENTS_LIST, NUMBER_OF_PICTURES);
-var commentCount = document.querySelector('.social__comment-count');
-var commentLoadMore = document.querySelector('.social__loadmore');
-var pictureUpload = document.querySelector('#upload-file');
-var pictureEditor = document.querySelector('.img-upload__overlay');
-var pictureEditorCloseButton = document.querySelector('.img-upload__cancel');
-var isFirstOpenOfEditor = true;
-
-pasteUsersPictures(usersPictures);
+pasteUsersPictures();
 commentCount.classList.add('visually-hidden');
 commentLoadMore.classList.add('visually-hidden');
 pictureUpload.addEventListener('change', function () {
