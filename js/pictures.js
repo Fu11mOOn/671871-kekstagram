@@ -36,7 +36,6 @@ var commentLoadMore = document.querySelector('.social__loadmore');
 var pictureUpload = document.querySelector('#upload-file');
 var pictureEditor = document.querySelector('.img-upload__overlay');
 var pictureEditorCloseButton = document.querySelector('.img-upload__cancel');
-var isFirstOpenOfEditor = true;
 
 var getRandomIntegerFromInterval = function (min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
@@ -143,64 +142,63 @@ var renderBigPicture = function (element) {
   document.addEventListener('keydown', onBigPictureEscPress);
   renderBigPictureComments();
 };
-var impositionOfEffectsOnPicturePreview = function () {
+var onPictureUploadChange = function () {
   var picturePreview = document.querySelector('.img-upload__preview img');
   var pictureEffects = document.querySelectorAll('.effects__preview');
   var pictureEffectsInput = document.querySelectorAll('.effects__radio');
+  var sizeUpButton = document.querySelector('.resize__control--plus');
+  var sizeDownButton = document.querySelector('.resize__control--minus');
+  var sizeInput = document.querySelector('.resize__control--value');
+  var currentSize = MAX_SIZE_OF_PICTURE_PREVIEW;
 
-  var changeClassOfPicturePreviewWhenPressedOnEffect = function (effect, input) {
-    effect.addEventListener('click', function () {
-      var effectClasses = effect.classList;
+  var onEffectPressed = function (evt) {
+    var elementClasses = evt.target.classList;
 
-      for (var i = 0; i < effectClasses.length; i++) {
-        if (EFFECT_CLASSES.indexOf(effectClasses[i]) !== -1) {
-          var currentClass = effectClasses[i];
+    for (var i = 0; i < elementClasses.length; i++) {
+      if (EFFECT_CLASSES.indexOf(elementClasses[i]) !== -1) {
+        var currentClass = elementClasses[i];
+        var elementNumber = EFFECT_CLASSES.indexOf(currentClass);
 
-          picturePreview.classList = '';
-          picturePreview.classList.add(currentClass);
-          input.checked = true;
-        }
+        picturePreview.classList = '';
+        picturePreview.classList.add(currentClass);
+        pictureEffectsInput[elementNumber].checked = true;
       }
+    }
 
-      editEffectIntensity();
-    });
+    editEffectIntensity();
   };
-  var editSizeOfPicturePreview = function () {
-    var sizeUpButton = document.querySelector('.resize__control--plus');
-    var sizeDownButton = document.querySelector('.resize__control--minus');
-    var sizeInput = document.querySelector('.resize__control--value');
-    var currentSize = MAX_SIZE_OF_PICTURE_PREVIEW;
+  var scalePicturePreview = function (value) {
+    var editProperty = function (valueOfProperty) {
+      currentSize = valueOfProperty;
+      sizeInput.value = currentSize + '%';
 
-    sizeInput.value = MAX_SIZE_OF_PICTURE_PREVIEW + '%';
-    sizeUpButton.addEventListener('click', function () {
-      if (currentSize < MAX_SIZE_OF_PICTURE_PREVIEW) {
-        currentSize += STEP_OF_CHANGE_SIZE_OF_PICTURE_PREVIEW;
-        sizeInput.value = currentSize + '%';
-        picturePreview.style.transform = 'scale(0.' + currentSize + ')';
-      }
-      if (currentSize >= MAX_SIZE_OF_PICTURE_PREVIEW) {
-        currentSize = MAX_SIZE_OF_PICTURE_PREVIEW;
-        sizeInput.value = currentSize + '%';
+      if (currentSize === MAX_SIZE_OF_PICTURE_PREVIEW) {
         picturePreview.style.transform = '';
-      }
-    });
-    sizeDownButton.addEventListener('click', function () {
-      if (currentSize > MIN_SIZE_OF_PICTURE_PREVIEW) {
-        currentSize -= STEP_OF_CHANGE_SIZE_OF_PICTURE_PREVIEW;
-        sizeInput.value = currentSize + '%';
+      } else {
         picturePreview.style.transform = 'scale(0.' + currentSize + ')';
+      }
+    };
 
-      }
-      if (currentSize <= MIN_SIZE_OF_PICTURE_PREVIEW) {
-        currentSize = MIN_SIZE_OF_PICTURE_PREVIEW;
-        sizeInput.value = currentSize + '%';
-        picturePreview.style.transform = 'scale(0.' + currentSize + ')';
-      }
-    });
+    if (value >= MAX_SIZE_OF_PICTURE_PREVIEW) {
+      editProperty(MAX_SIZE_OF_PICTURE_PREVIEW);
+    } else if (value < MIN_SIZE_OF_PICTURE_PREVIEW) {
+      editProperty(MIN_SIZE_OF_PICTURE_PREVIEW);
+    } else {
+      editProperty(value);
+    }
+  };
+  var onSizeUpButtonPressed = function () {
+    if (currentSize < MAX_SIZE_OF_PICTURE_PREVIEW) {
+      scalePicturePreview(currentSize + STEP_OF_CHANGE_SIZE_OF_PICTURE_PREVIEW);
+    }
+  };
+  var onSizeDownButtonPressed = function () {
+    if (currentSize > MIN_SIZE_OF_PICTURE_PREVIEW) {
+      scalePicturePreview(currentSize - STEP_OF_CHANGE_SIZE_OF_PICTURE_PREVIEW);
+    }
   };
   // Просто заготовка для будущей функции изменения насыщенности эффекта
   var editEffectIntensity = function () {
-    // var sliderOfEffectIntensity = document.querySelector('.scale__pin');
     var sliderContainer = document.querySelector('.img-upload__scale');
 
     if (picturePreview.classList.contains(ORIGINAL_PICTURE_CLASS)) {
@@ -209,36 +207,36 @@ var impositionOfEffectsOnPicturePreview = function () {
       sliderContainer.classList.remove('hidden');
     }
   };
-
-  if (isFirstOpenOfEditor) {
-    isFirstOpenOfEditor = false;
-
-    for (var i = 0; i < pictureEffects.length; i++) {
-      changeClassOfPicturePreviewWhenPressedOnEffect(pictureEffects[i], pictureEffectsInput[i]);
+  var onPictureEditorClose = function () {
+    pictureUpload.value = '';
+    pictureEditor.classList.add('hidden');
+    document.removeEventListener('keydown', onPictureEditorEscPressed);
+    pictureEditorCloseButton.removeEventListener('click', onPictureEditorClose);
+    sizeUpButton.removeEventListener('click', onSizeUpButtonPressed);
+    sizeDownButton.removeEventListener('click', onSizeDownButtonPressed);
+    pictureEffects.forEach(function (element) {
+      element.removeEventListener('click', onEffectPressed);
+    });
+  };
+  var onPictureEditorEscPressed = function (evt) {
+    if (evt.keyCode === ESC_KEYCODE) {
+      onPictureEditorClose();
     }
+  };
 
-    editEffectIntensity();
-    editSizeOfPicturePreview();
-  }
-};
-var onPictureEditorClose = function () {
-  pictureEditor.classList.add('hidden');
-  document.removeEventListener('keydown', onPictureEditorEscPressed);
-  pictureEditorCloseButton.removeEventListener('click', onPictureEditorClose);
-  pictureUpload.value = '';
-};
-var onPictureEditorEscPressed = function (evt) {
-  if (evt.keyCode === ESC_KEYCODE) {
-    onPictureEditorClose();
-  }
+  pictureEffects.forEach(function (element) {
+    element.addEventListener('click', onEffectPressed);
+  });
+  editEffectIntensity();
+  pictureEditor.classList.remove('hidden');
+  document.addEventListener('keydown', onPictureEditorEscPressed);
+  pictureEditorCloseButton.addEventListener('click', onPictureEditorClose);
+  sizeInput.value = MAX_SIZE_OF_PICTURE_PREVIEW + '%';
+  sizeUpButton.addEventListener('click', onSizeUpButtonPressed);
+  sizeDownButton.addEventListener('click', onSizeDownButtonPressed);
 };
 
 pasteUsersPictures();
 commentCount.classList.add('visually-hidden');
 commentLoadMore.classList.add('visually-hidden');
-pictureUpload.addEventListener('change', function () {
-  pictureEditor.classList.remove('hidden');
-  document.addEventListener('keydown', onPictureEditorEscPressed);
-  pictureEditorCloseButton.addEventListener('click', onPictureEditorClose);
-  impositionOfEffectsOnPicturePreview();
-});
+pictureUpload.addEventListener('change', onPictureUploadChange);
