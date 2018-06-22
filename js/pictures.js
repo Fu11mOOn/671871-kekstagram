@@ -223,34 +223,41 @@ var onPictureUploadChange = function () {
       sliderContainer.classList.remove('hidden');
     }
   };
-  var onUploadSubmitPressed = function () {
+  var onFormSubmit = function () {
     var hashtags = hashtagsInput.value;
-    var arrayHashtags = hashtags.split('#');
+    var arrayHashtags = hashtags.split(' ');
 
-    arrayHashtags.splice(0, 1);
+    var hashtagsInputValidation = function () {
+      if (hashtagsInput.valid) {
+        hashtagsInput.classList.remove('text__hashtags--error');
+      } else {
+        hashtagsInput.classList.add('text__hashtags--error');
+      }
+    };
 
     for (var i = 0; i < arrayHashtags.length; i++) {
       arrayHashtags[i] = arrayHashtags[i].toLowerCase();
 
-      if (!arrayHashtags[i].length || getNumberOfSimilarElementsAtArray(arrayHashtags[i], ' ') === arrayHashtags[i].length) {
+      if (arrayHashtags[i][0] !== '#') {
+        hashtagsInput.setCustomValidity('Хештег должен начинаться с символа "#"');
+      } else if (arrayHashtags[i].length === 1) {
         hashtagsInput.setCustomValidity('Хештег не может содержать только символ "#"');
-        // Не получается сделать здесь проверку, что если у хештега на конце нету пробела и это не последний хештег, то тогда появляется окно. Пробовал так условие поставить - arrayHashtags[i].lastIndexOf(' ') !== arrayHashtags[i].length - 1 && i !== arrayHashtags.length - 1. Также,  почему-то подобные хештеги '#2#1 ' все равно отправляются
-      } else if (arrayHashtags[i].lastIndexOf(' ') !== arrayHashtags[i].length - 1) {
+      } else if (getNumberOfSimilarElementsAtArray(arrayHashtags[i], '#') > 1) {
         hashtagsInput.setCustomValidity('Хештеги нужно отделять друг от друга пробелами');
       } else if (getNumberOfSimilarElementsAtArray(arrayHashtags, arrayHashtags[i]) > 1) {
         hashtagsInput.setCustomValidity('Нельзя, чтобы хештеги повторялись');
-      } else if (arrayHashtags[i].length > HASHTAGS_MAX_LENGTH - 1) {
+      } else if (arrayHashtags[i].length > HASHTAGS_MAX_LENGTH) {
         hashtagsInput.setCustomValidity('Количество символов в хештеге (включая "#") должно быть не больше ' + HASHTAGS_MAX_LENGTH);
       } else {
         hashtagsInput.setCustomValidity('');
       }
     }
 
-    if (hashtags.indexOf('#') === -1 || hashtags.indexOf('#') !== 0) {
-      hashtagsInput.setCustomValidity('Начните писать с символа "#"');
-    } else if (arrayHashtags.length > HASHTAGS_MAX_NUMBER) {
+    if (arrayHashtags.length > HASHTAGS_MAX_NUMBER) {
       hashtagsInput.setCustomValidity('Количество хештегов должно быть не больше ' + HASHTAGS_MAX_NUMBER);
     }
+
+    hashtagsInputValidation();
   };
   var onPictureEditorClose = function () {
     pictureUpload.value = '';
@@ -266,7 +273,7 @@ var onPictureUploadChange = function () {
     hashtagsInput.removeEventListener('blur', onHashtagsInputBlur);
     commentInput.removeEventListener('focus', onCommentInputFocus);
     commentInput.removeEventListener('blur', onCommentInputBlur);
-    uploadSubmitButton.removeEventListener('click', onUploadSubmitPressed);
+    uploadSubmitButton.removeEventListener('click', onFormSubmit);
   };
   var onPictureEditorEscPressed = function (evt) {
     if (evt.keyCode === ESC_KEYCODE) {
@@ -300,7 +307,7 @@ var onPictureUploadChange = function () {
   hashtagsInput.addEventListener('blur', onHashtagsInputBlur);
   commentInput.addEventListener('focus', onCommentInputFocus);
   commentInput.addEventListener('blur', onCommentInputBlur);
-  uploadSubmitButton.addEventListener('click', onUploadSubmitPressed);
+  uploadSubmitButton.addEventListener('click', onFormSubmit);
 };
 
 pasteUsersPictures();
