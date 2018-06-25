@@ -228,7 +228,7 @@ var onPictureUploadChange = function () {
     var arrayHashtags = hashtags.split(' ');
 
     var hashtagsInputValidation = function () {
-      if (hashtagsInput.valid) {
+      if (hashtagsInput.validity.valid) {
         hashtagsInput.classList.remove('text__hashtags--error');
       } else {
         hashtagsInput.classList.add('text__hashtags--error');
@@ -238,7 +238,7 @@ var onPictureUploadChange = function () {
     for (var i = 0; i < arrayHashtags.length; i++) {
       arrayHashtags[i] = arrayHashtags[i].toLowerCase();
 
-      if (arrayHashtags[i][0] !== '#') {
+      if (arrayHashtags[i] && arrayHashtags[i][0] !== '#') {
         hashtagsInput.setCustomValidity('Хештег должен начинаться с символа "#"');
       } else if (arrayHashtags[i].length === 1) {
         hashtagsInput.setCustomValidity('Хештег не может содержать только символ "#"');
