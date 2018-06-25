@@ -30,6 +30,8 @@ var ORIGINAL_PICTURE_CLASS = 'effects__preview--none';
 var STEP_OF_CHANGE_SIZE_OF_PICTURE_PREVIEW = 25;
 var MIN_SIZE_OF_PICTURE_PREVIEW = 25;
 var MAX_SIZE_OF_PICTURE_PREVIEW = 100;
+var HASHTAGS_MAX_LENGTH = 20;
+var HASHTAGS_MAX_NUMBER = 5;
 
 var commentCount = document.querySelector('.social__comment-count');
 var commentLoadMore = document.querySelector('.social__loadmore');
@@ -39,6 +41,17 @@ var pictureEditorCloseButton = document.querySelector('.img-upload__cancel');
 
 var getRandomIntegerFromInterval = function (min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
+};
+var getNumberOfSimilarElementsAtArray = function (array, element) {
+  var number = 0;
+
+  for (var i = 0; i < array.length; i++) {
+    if (array[i] === element) {
+      number++;
+    }
+  }
+
+  return number;
 };
 var generateUsersPictures = function (descriptionsList, commentsList, numberOfPictures) {
   var usersPictures = [];
@@ -149,6 +162,9 @@ var onPictureUploadChange = function () {
   var sizeUpButton = document.querySelector('.resize__control--plus');
   var sizeDownButton = document.querySelector('.resize__control--minus');
   var sizeInput = document.querySelector('.resize__control--value');
+  var hashtagsInput = document.querySelector('.text__hashtags');
+  var commentInput = document.querySelector('.text__description');
+  var uploadSubmitButton = document.querySelector('.img-upload__submit');
   var currentSize = MAX_SIZE_OF_PICTURE_PREVIEW;
 
   var onEffectPressed = function (evt) {
@@ -207,6 +223,46 @@ var onPictureUploadChange = function () {
       sliderContainer.classList.remove('hidden');
     }
   };
+  var onFormSubmit = function () {
+    var hashtags = hashtagsInput.value.trim();
+    var arrayHashtags = hashtags.split(' ');
+
+    var hashtagsInputValidation = function () {
+      if (hashtagsInput.validity.valid) {
+        hashtagsInput.classList.remove('text__hashtags--error');
+      } else {
+        hashtagsInput.classList.add('text__hashtags--error');
+      }
+    };
+
+    if (hashtags) {
+      for (var i = 0; i < arrayHashtags.length; i++) {
+        arrayHashtags[i] = arrayHashtags[i].toLowerCase();
+
+        if (arrayHashtags[i][0] !== '#') {
+          hashtagsInput.setCustomValidity('Хештег должен начинаться с символа "#"');
+        } else if (arrayHashtags[i].length === 1) {
+          hashtagsInput.setCustomValidity('Хештег не может содержать только символ "#"');
+        } else if (getNumberOfSimilarElementsAtArray(arrayHashtags[i], '#') > 1) {
+          hashtagsInput.setCustomValidity('Хештеги нужно отделять друг от друга пробелами');
+        } else if (getNumberOfSimilarElementsAtArray(arrayHashtags, arrayHashtags[i]) > 1) {
+          hashtagsInput.setCustomValidity('Нельзя, чтобы хештеги повторялись');
+        } else if (arrayHashtags[i].length > HASHTAGS_MAX_LENGTH) {
+          hashtagsInput.setCustomValidity('Количество символов в хештеге (включая "#") должно быть не больше ' + HASHTAGS_MAX_LENGTH);
+        } else {
+          hashtagsInput.setCustomValidity('');
+        }
+      }
+
+      if (arrayHashtags.length > HASHTAGS_MAX_NUMBER) {
+        hashtagsInput.setCustomValidity('Количество хештегов должно быть не больше ' + HASHTAGS_MAX_NUMBER);
+      }
+    } else {
+      hashtagsInput.setCustomValidity('');
+    }
+
+    hashtagsInputValidation();
+  };
   var onPictureEditorClose = function () {
     pictureUpload.value = '';
     pictureEditor.classList.add('hidden');
@@ -217,11 +273,28 @@ var onPictureUploadChange = function () {
     pictureEffects.forEach(function (element) {
       element.removeEventListener('click', onEffectPressed);
     });
+    hashtagsInput.removeEventListener('focus', onHashtagsInputFocus);
+    hashtagsInput.removeEventListener('blur', onHashtagsInputBlur);
+    commentInput.removeEventListener('focus', onCommentInputFocus);
+    commentInput.removeEventListener('blur', onCommentInputBlur);
+    uploadSubmitButton.removeEventListener('click', onFormSubmit);
   };
   var onPictureEditorEscPressed = function (evt) {
     if (evt.keyCode === ESC_KEYCODE) {
       onPictureEditorClose();
     }
+  };
+  var onHashtagsInputFocus = function () {
+    document.removeEventListener('keydown', onPictureEditorEscPressed);
+  };
+  var onHashtagsInputBlur = function () {
+    document.addEventListener('keydown', onPictureEditorEscPressed);
+  };
+  var onCommentInputFocus = function () {
+    document.removeEventListener('keydown', onPictureEditorEscPressed);
+  };
+  var onCommentInputBlur = function () {
+    document.addEventListener('keydown', onPictureEditorEscPressed);
   };
 
   pictureEffects.forEach(function (element) {
@@ -234,6 +307,11 @@ var onPictureUploadChange = function () {
   sizeInput.value = MAX_SIZE_OF_PICTURE_PREVIEW + '%';
   sizeUpButton.addEventListener('click', onSizeUpButtonPressed);
   sizeDownButton.addEventListener('click', onSizeDownButtonPressed);
+  hashtagsInput.addEventListener('focus', onHashtagsInputFocus);
+  hashtagsInput.addEventListener('blur', onHashtagsInputBlur);
+  commentInput.addEventListener('focus', onCommentInputFocus);
+  commentInput.addEventListener('blur', onCommentInputBlur);
+  uploadSubmitButton.addEventListener('click', onFormSubmit);
 };
 
 pasteUsersPictures();
