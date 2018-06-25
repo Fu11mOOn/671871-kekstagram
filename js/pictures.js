@@ -224,7 +224,7 @@ var onPictureUploadChange = function () {
     }
   };
   var onFormSubmit = function () {
-    var hashtags = hashtagsInput.value;
+    var hashtags = hashtagsInput.value.trim();
     var arrayHashtags = hashtags.split(' ');
 
     var hashtagsInputValidation = function () {
@@ -235,26 +235,30 @@ var onPictureUploadChange = function () {
       }
     };
 
-    for (var i = 0; i < arrayHashtags.length; i++) {
-      arrayHashtags[i] = arrayHashtags[i].toLowerCase();
+    if (hashtags) {
+      for (var i = 0; i < arrayHashtags.length; i++) {
+        arrayHashtags[i] = arrayHashtags[i].toLowerCase();
 
-      if (arrayHashtags[i] && arrayHashtags[i][0] !== '#') {
-        hashtagsInput.setCustomValidity('Хештег должен начинаться с символа "#"');
-      } else if (arrayHashtags[i].length === 1) {
-        hashtagsInput.setCustomValidity('Хештег не может содержать только символ "#"');
-      } else if (getNumberOfSimilarElementsAtArray(arrayHashtags[i], '#') > 1) {
-        hashtagsInput.setCustomValidity('Хештеги нужно отделять друг от друга пробелами');
-      } else if (getNumberOfSimilarElementsAtArray(arrayHashtags, arrayHashtags[i]) > 1) {
-        hashtagsInput.setCustomValidity('Нельзя, чтобы хештеги повторялись');
-      } else if (arrayHashtags[i].length > HASHTAGS_MAX_LENGTH) {
-        hashtagsInput.setCustomValidity('Количество символов в хештеге (включая "#") должно быть не больше ' + HASHTAGS_MAX_LENGTH);
-      } else {
-        hashtagsInput.setCustomValidity('');
+        if (arrayHashtags[i] && arrayHashtags[i][0] !== '#') {
+          hashtagsInput.setCustomValidity('Хештег должен начинаться с символа "#"');
+        } else if (arrayHashtags[i].length === 1) {
+          hashtagsInput.setCustomValidity('Хештег не может содержать только символ "#"');
+        } else if (getNumberOfSimilarElementsAtArray(arrayHashtags[i], '#') > 1) {
+          hashtagsInput.setCustomValidity('Хештеги нужно отделять друг от друга пробелами');
+        } else if (getNumberOfSimilarElementsAtArray(arrayHashtags, arrayHashtags[i]) > 1) {
+          hashtagsInput.setCustomValidity('Нельзя, чтобы хештеги повторялись');
+        } else if (arrayHashtags[i].length > HASHTAGS_MAX_LENGTH) {
+          hashtagsInput.setCustomValidity('Количество символов в хештеге (включая "#") должно быть не больше ' + HASHTAGS_MAX_LENGTH);
+        } else {
+          hashtagsInput.setCustomValidity('');
+        }
       }
-    }
 
-    if (arrayHashtags.length > HASHTAGS_MAX_NUMBER) {
-      hashtagsInput.setCustomValidity('Количество хештегов должно быть не больше ' + HASHTAGS_MAX_NUMBER);
+      if (arrayHashtags.length > HASHTAGS_MAX_NUMBER) {
+        hashtagsInput.setCustomValidity('Количество хештегов должно быть не больше ' + HASHTAGS_MAX_NUMBER);
+      }
+    } else {
+      hashtagsInput.setCustomValidity('');
     }
 
     hashtagsInputValidation();
