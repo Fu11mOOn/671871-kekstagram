@@ -24,9 +24,25 @@ var EFFECT_CLASSES = [
   'effects__preview--phobos',
   'effects__preview--heat'
 ];
+var EFFECT_PROPERTY = [
+  'grayscale',
+  'sepia',
+  'invert',
+  'blur',
+  'brightness'
+];
+var EFFECT_VALUE = [
+  1,
+  1,
+  1,
+  3,
+  2
+];
 var NUMBER_OF_PICTURES = 25;
 var ESC_KEYCODE = 27;
 var ORIGINAL_PICTURE_CLASS = 'effects__preview--none';
+var PHOBOS_PICTURE_CLASS = 'effects__preview--phobos';
+var HEAT_PICTURE_CLASS = 'effects__preview--heat';
 var STEP_OF_CHANGE_SIZE_OF_PICTURE_PREVIEW = 25;
 var MIN_SIZE_OF_PICTURE_PREVIEW = 25;
 var MAX_SIZE_OF_PICTURE_PREVIEW = 100;
@@ -166,7 +182,26 @@ var onPictureUploadChange = function () {
   var commentInput = document.querySelector('.text__description');
   var uploadSubmitButton = document.querySelector('.img-upload__submit');
   var currentSize = MAX_SIZE_OF_PICTURE_PREVIEW;
+  var sliderContainer = document.querySelector('.img-upload__scale');
+  var sliderOfEffectIntensity = document.querySelector('.scale__pin');
+  var sliderValue = document.querySelector('.scale__value');
+  var sliderLine = document.querySelector('.scale__line');
+  var sliderBar = document.querySelector('.scale__level');
+  var lineWidth = '';
 
+  var changeDisplayOfSlider = function () {
+    if (picturePreview.classList.contains(ORIGINAL_PICTURE_CLASS)) {
+      sliderContainer.classList.add('hidden');
+    } else {
+      sliderContainer.classList.remove('hidden');
+    }
+  };
+  var setDelaultOfEffect = function () {
+    sliderBar.style.width = 100 + '%';
+    sliderOfEffectIntensity.style.left = lineWidth + 'px';
+    sliderValue.value = 100;
+    picturePreview.style.filter = '';
+  };
   var onEffectPressed = function (evt) {
     var elementClasses = evt.target.classList;
 
@@ -181,7 +216,8 @@ var onPictureUploadChange = function () {
       }
     }
 
-    editEffectIntensity();
+    setDelaultOfEffect();
+    changeDisplayOfSlider();
   };
   var scalePicturePreview = function (value) {
     var editProperty = function (valueOfProperty) {
@@ -213,15 +249,48 @@ var onPictureUploadChange = function () {
       scalePicturePreview(currentSize - STEP_OF_CHANGE_SIZE_OF_PICTURE_PREVIEW);
     }
   };
-  // Просто заготовка для будущей функции изменения насыщенности эффекта
-  var editEffectIntensity = function () {
-    var sliderContainer = document.querySelector('.img-upload__scale');
+  var onSliderMouseDown = function (evt) {
+    var startCoordinateX = evt.clientX;
 
-    if (picturePreview.classList.contains(ORIGINAL_PICTURE_CLASS)) {
-      sliderContainer.classList.add('hidden');
-    } else {
-      sliderContainer.classList.remove('hidden');
-    }
+    var onMouseMove = function (moveEvt) {
+      var shiftX = startCoordinateX - moveEvt.clientX;
+      var coordinate = sliderOfEffectIntensity.offsetLeft - shiftX;
+
+      moveEvt.preventDefault();
+      startCoordinateX = moveEvt.clientX;
+
+      if (coordinate >= 0 && coordinate <= lineWidth) {
+        var percent = coordinate / lineWidth;
+
+        var changeFilterValue = function (effectClass, property, value) {
+          if (picturePreview.classList.contains(effectClass)) {
+            if (picturePreview.classList.contains(PHOBOS_PICTURE_CLASS)) {
+              picturePreview.style.filter = property + '(' + (percent * value) + 'px)';
+            } else if (picturePreview.classList.contains(HEAT_PICTURE_CLASS)) {
+              picturePreview.style.filter = property + '(' + ((percent * value) + 1) + ')';
+            } else {
+              picturePreview.style.filter = property + '(' + percent * value + ')';
+            }
+          }
+        };
+
+        sliderOfEffectIntensity.style.left = coordinate + 'px';
+        sliderBar.style.width = Math.floor(percent * 100) + '%';
+        sliderValue.value = Math.floor(percent * 100);
+
+        for (var i = 0; i < EFFECT_PROPERTY.length; i++) {
+          changeFilterValue(EFFECT_CLASSES[i + 1], EFFECT_PROPERTY[i], EFFECT_VALUE[i]);
+        }
+      }
+    };
+    var onMouseUp = function (upEvt) {
+      upEvt.preventDefault();
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
   };
   var onFormSubmit = function () {
     var hashtags = hashtagsInput.value.trim();
@@ -265,6 +334,7 @@ var onPictureUploadChange = function () {
   };
   var onPictureEditorClose = function () {
     pictureUpload.value = '';
+    picturePreview.style.transform = '';
     pictureEditor.classList.add('hidden');
     document.removeEventListener('keydown', onPictureEditorEscPressed);
     pictureEditorCloseButton.removeEventListener('click', onPictureEditorClose);
@@ -278,6 +348,12 @@ var onPictureUploadChange = function () {
     commentInput.removeEventListener('focus', onCommentInputFocus);
     commentInput.removeEventListener('blur', onCommentInputBlur);
     uploadSubmitButton.removeEventListener('click', onFormSubmit);
+    sliderOfEffectIntensity.removeEventListener('mousedown', onSliderMouseDown);
+    EFFECT_CLASSES.forEach(function (element) {
+      if (picturePreview.classList.contains(element)) {
+        picturePreview.classList.remove(element);
+      }
+    });
   };
   var onPictureEditorEscPressed = function (evt) {
     if (evt.keyCode === ESC_KEYCODE) {
@@ -297,11 +373,10 @@ var onPictureUploadChange = function () {
     document.addEventListener('keydown', onPictureEditorEscPressed);
   };
 
+  pictureEditor.classList.remove('hidden');
   pictureEffects.forEach(function (element) {
     element.addEventListener('click', onEffectPressed);
   });
-  editEffectIntensity();
-  pictureEditor.classList.remove('hidden');
   document.addEventListener('keydown', onPictureEditorEscPressed);
   pictureEditorCloseButton.addEventListener('click', onPictureEditorClose);
   sizeInput.value = MAX_SIZE_OF_PICTURE_PREVIEW + '%';
@@ -312,6 +387,11 @@ var onPictureUploadChange = function () {
   commentInput.addEventListener('focus', onCommentInputFocus);
   commentInput.addEventListener('blur', onCommentInputBlur);
   uploadSubmitButton.addEventListener('click', onFormSubmit);
+  sliderOfEffectIntensity.addEventListener('mousedown', onSliderMouseDown);
+  picturePreview.classList.add(ORIGINAL_PICTURE_CLASS);
+  lineWidth = sliderLine.offsetWidth;
+  setDelaultOfEffect();
+  changeDisplayOfSlider();
 };
 
 pasteUsersPictures();
