@@ -16,22 +16,14 @@ var COMMENTS_LIST = [
   'Я поскользнулся на банановой кожуре и уронил фотоаппарат на кота и у меня получилась фотография лучше.',
   'Лица у людей на фотке перекошены, как будто их избивают. Как можно было поймать такой неудачный момент?!'
 ];
-var EFFECT_CLASSES = [
-  'effects__preview--none',
-  'effects__preview--chrome',
-  'effects__preview--sepia',
-  'effects__preview--marvin',
-  'effects__preview--phobos',
-  'effects__preview--heat'
-];
 var NUMBER_OF_PICTURES = 25;
 var ESC_KEYCODE = 27;
-var ORIGINAL_PICTURE_CLASS = 'effects__preview--none';
 var STEP_OF_CHANGE_SIZE_OF_PICTURE_PREVIEW = 25;
 var MIN_SIZE_OF_PICTURE_PREVIEW = 25;
 var MAX_SIZE_OF_PICTURE_PREVIEW = 100;
 var HASHTAGS_MAX_LENGTH = 20;
 var HASHTAGS_MAX_NUMBER = 5;
+var DEFAULT_EFFECT_VALUE = 100;
 
 var commentCount = document.querySelector('.social__comment-count');
 var commentLoadMore = document.querySelector('.social__loadmore');
@@ -156,9 +148,10 @@ var renderBigPicture = function (element) {
   renderBigPictureComments();
 };
 var onPictureUploadChange = function () {
-  var picturePreview = document.querySelector('.img-upload__preview img');
-  var pictureEffects = document.querySelectorAll('.effects__preview');
-  var pictureEffectsInput = document.querySelectorAll('.effects__radio');
+  var picturePreviewContainer = document.querySelector('.img-upload__preview');
+  var picturePreview = picturePreviewContainer.querySelector('img');
+  var pictureEffects = document.querySelectorAll('.effects__radio');
+  var currentEffect = document.querySelector('input[type="radio"]:checked').value;
   var sizeUpButton = document.querySelector('.resize__control--plus');
   var sizeDownButton = document.querySelector('.resize__control--minus');
   var sizeInput = document.querySelector('.resize__control--value');
@@ -166,32 +159,22 @@ var onPictureUploadChange = function () {
   var commentInput = document.querySelector('.text__description');
   var uploadSubmitButton = document.querySelector('.img-upload__submit');
   var currentSize = MAX_SIZE_OF_PICTURE_PREVIEW;
+  var sliderContainer = document.querySelector('.img-upload__scale');
+  var sliderOfEffectIntensity = document.querySelector('.scale__pin');
+  var sliderValue = document.querySelector('.scale__value');
+  var sliderLine = document.querySelector('.scale__line');
+  var sliderBar = document.querySelector('.scale__level');
+  var lineWidth = '';
 
-  var onEffectPressed = function (evt) {
-    var elementClasses = evt.target.classList;
-
-    for (var i = 0; i < elementClasses.length; i++) {
-      if (EFFECT_CLASSES.indexOf(elementClasses[i]) !== -1) {
-        var currentClass = elementClasses[i];
-        var elementNumber = EFFECT_CLASSES.indexOf(currentClass);
-
-        picturePreview.classList = '';
-        picturePreview.classList.add(currentClass);
-        pictureEffectsInput[elementNumber].checked = true;
-      }
-    }
-
-    editEffectIntensity();
-  };
   var scalePicturePreview = function (value) {
     var editProperty = function (valueOfProperty) {
       currentSize = valueOfProperty;
       sizeInput.value = currentSize + '%';
 
       if (currentSize === MAX_SIZE_OF_PICTURE_PREVIEW) {
-        picturePreview.style.transform = '';
+        picturePreviewContainer.style.transform = '';
       } else {
-        picturePreview.style.transform = 'scale(0.' + currentSize + ')';
+        picturePreviewContainer.style.transform = 'scale(0.' + currentSize + ')';
       }
     };
 
@@ -213,15 +196,81 @@ var onPictureUploadChange = function () {
       scalePicturePreview(currentSize - STEP_OF_CHANGE_SIZE_OF_PICTURE_PREVIEW);
     }
   };
-  // Просто заготовка для будущей функции изменения насыщенности эффекта
-  var editEffectIntensity = function () {
-    var sliderContainer = document.querySelector('.img-upload__scale');
-
-    if (picturePreview.classList.contains(ORIGINAL_PICTURE_CLASS)) {
+  var hideSlider = function () {
+    if (currentEffect === 'none') {
       sliderContainer.classList.add('hidden');
+      sliderValue.value = '';
     } else {
       sliderContainer.classList.remove('hidden');
     }
+  };
+  var setDelaultForEffect = function () {
+    sliderBar.style.width = DEFAULT_EFFECT_VALUE + '%';
+    sliderOfEffectIntensity.style.left = lineWidth + 'px';
+    sliderValue.value = DEFAULT_EFFECT_VALUE;
+    picturePreview.style.filter = '';
+  };
+  var onEffectChange = function (evt) {
+    var effectValue = evt.target.value;
+    var effectClass = 'effects__preview--' + effectValue;
+
+    picturePreview.classList = '';
+    picturePreview.classList.add(effectClass);
+    currentEffect = effectValue;
+
+    setDelaultForEffect();
+    hideSlider();
+  };
+  var setEffect = function (effect, value) {
+    switch (effect) {
+      case 'chrome':
+        picturePreview.style.filter = 'grayscale(' + value + ')';
+        break;
+      case 'sepia':
+        picturePreview.style.filter = 'sepia(' + value + ')';
+        break;
+      case 'marvin':
+        picturePreview.style.filter = 'invert(' + value + ')';
+        break;
+      case 'phobos':
+        picturePreview.style.filter = 'blur(' + (value * 3) + 'px)';
+        break;
+      case 'heat':
+        picturePreview.style.filter = 'brightness(' + ((value * 2) + 1) + ')';
+        break;
+      default:
+        picturePreview.style.filter = '';
+        break;
+    }
+  };
+  var onSliderMouseDown = function (evt) {
+    var startCoordinateX = evt.clientX;
+
+    var onMouseMove = function (moveEvt) {
+      var shiftX = startCoordinateX - moveEvt.clientX;
+      var coordinate = sliderOfEffectIntensity.offsetLeft - shiftX;
+
+      moveEvt.preventDefault();
+      startCoordinateX = moveEvt.clientX;
+
+      if (coordinate >= 0 && coordinate <= lineWidth) {
+        var percent = coordinate / lineWidth;
+
+        sliderOfEffectIntensity.style.left = coordinate + 'px';
+        sliderBar.style.width = Math.floor(percent * 100) + '%';
+        sliderValue.value = Math.floor(percent * 100);
+
+        setEffect(currentEffect, percent);
+      }
+    };
+    var onMouseUp = function (upEvt) {
+      upEvt.preventDefault();
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
   };
   var onFormSubmit = function () {
     var hashtags = hashtagsInput.value.trim();
@@ -265,19 +314,24 @@ var onPictureUploadChange = function () {
   };
   var onPictureEditorClose = function () {
     pictureUpload.value = '';
+    picturePreviewContainer.style.transform = '';
+    picturePreview.style.filter = '';
+    picturePreview.classList = '';
     pictureEditor.classList.add('hidden');
     document.removeEventListener('keydown', onPictureEditorEscPressed);
     pictureEditorCloseButton.removeEventListener('click', onPictureEditorClose);
     sizeUpButton.removeEventListener('click', onSizeUpButtonPressed);
     sizeDownButton.removeEventListener('click', onSizeDownButtonPressed);
     pictureEffects.forEach(function (element) {
-      element.removeEventListener('click', onEffectPressed);
+      element.removeEventListener('change', onEffectChange);
     });
     hashtagsInput.removeEventListener('focus', onHashtagsInputFocus);
     hashtagsInput.removeEventListener('blur', onHashtagsInputBlur);
     commentInput.removeEventListener('focus', onCommentInputFocus);
     commentInput.removeEventListener('blur', onCommentInputBlur);
     uploadSubmitButton.removeEventListener('click', onFormSubmit);
+    sliderOfEffectIntensity.removeEventListener('mousedown', onSliderMouseDown);
+    sliderContainer.classList.remove('hidden');
   };
   var onPictureEditorEscPressed = function (evt) {
     if (evt.keyCode === ESC_KEYCODE) {
@@ -297,11 +351,10 @@ var onPictureUploadChange = function () {
     document.addEventListener('keydown', onPictureEditorEscPressed);
   };
 
-  pictureEffects.forEach(function (element) {
-    element.addEventListener('click', onEffectPressed);
-  });
-  editEffectIntensity();
   pictureEditor.classList.remove('hidden');
+  pictureEffects.forEach(function (element) {
+    element.addEventListener('change', onEffectChange);
+  });
   document.addEventListener('keydown', onPictureEditorEscPressed);
   pictureEditorCloseButton.addEventListener('click', onPictureEditorClose);
   sizeInput.value = MAX_SIZE_OF_PICTURE_PREVIEW + '%';
@@ -312,6 +365,9 @@ var onPictureUploadChange = function () {
   commentInput.addEventListener('focus', onCommentInputFocus);
   commentInput.addEventListener('blur', onCommentInputBlur);
   uploadSubmitButton.addEventListener('click', onFormSubmit);
+  sliderOfEffectIntensity.addEventListener('mousedown', onSliderMouseDown);
+  lineWidth = sliderLine.offsetWidth;
+  hideSlider();
 };
 
 pasteUsersPictures();
