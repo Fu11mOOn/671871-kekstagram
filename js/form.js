@@ -10,7 +10,7 @@
 
   var pictureUpload = document.querySelector('#upload-file');
 
-  window.onPictureUploadChange = function () {
+  var onPictureUploadChange = function () {
     var pictureEditor = document.querySelector('.img-upload__overlay');
     var pictureEditorCloseButton = document.querySelector('.img-upload__cancel');
     var picturePreviewContainer = document.querySelector('.img-upload__preview');
@@ -233,5 +233,5 @@
     hideSlider();
   };
 
-  pictureUpload.addEventListener('change', window.onPictureUploadChange);
+  pictureUpload.addEventListener('change', onPictureUploadChange);
 }());

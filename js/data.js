@@ -19,7 +19,7 @@
   ];
   var NUMBER_OF_PICTURES = 25;
 
-  window.generateUsersPictures = function () {
+  window.data = function () {
     var usersPictures = [];
 
     var generateUserComments = function (array) {

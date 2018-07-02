@@ -2,7 +2,7 @@
 
 (function () {
   var pasteUsersPictures = function () {
-    var usersPictures = window.generateUsersPictures();
+    var usersPictures = window.data();
     var usersPicturesList = document.querySelector('.pictures');
     var fragment = document.createDocumentFragment();
 
@@ -11,7 +11,7 @@
 
       var onUserPictureClick = function (evt) {
         evt.preventDefault();
-        window.renderBigPicture(element);
+        window.preview(element);
       };
 
       userPictureTemplate.href = element.url;
