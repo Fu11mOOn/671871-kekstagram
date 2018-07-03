@@ -4,7 +4,7 @@
   var commentCount = document.querySelector('.social__comment-count');
   var commentLoadMore = document.querySelector('.social__loadmore');
 
-  window.preview = function (element) {
+  window.showPreview = function (element) {
     var bigPictureCloseButton = document.querySelector('.big-picture__cancel');
     var bigPicture = document.querySelector('.big-picture');
 
