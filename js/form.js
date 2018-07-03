@@ -11,6 +11,7 @@
   var pictureUpload = document.querySelector('#upload-file');
 
   var onPictureUploadChange = function () {
+    var form = document.querySelector('.img-upload__form');
     var pictureEditor = document.querySelector('.img-upload__overlay');
     var pictureEditorCloseButton = document.querySelector('.img-upload__cancel');
     var picturePreviewContainer = document.querySelector('.img-upload__preview');
@@ -21,6 +22,7 @@
     var sizeDownButton = document.querySelector('.resize__control--minus');
     var sizeInput = document.querySelector('.resize__control--value');
     var hashtagsInput = document.querySelector('.text__hashtags');
+    var commentsInput = document.querySelector('.text__description');
     var commentInput = document.querySelector('.text__description');
     var uploadSubmitButton = document.querySelector('.img-upload__submit');
     var currentSize = MAX_SIZE_OF_PICTURE_PREVIEW;
@@ -137,13 +139,22 @@
       document.addEventListener('mousemove', onMouseMove);
       document.addEventListener('mouseup', onMouseUp);
     };
-    var onFormSubmit = function () {
+    var onLoad = function () {
+      onPictureEditorClose();
+      window.utilits.removeErrorText(pictureEditor);
+    };
+    var onError = function (errorText) {
+      window.utilits.addErrorText(errorText, pictureEditor);
+    };
+    var onFormSubmit = function (evt) {
       var hashtags = hashtagsInput.value.trim();
       var arrayHashtags = hashtags.split(' ');
 
       var hashtagsInputValidation = function () {
         if (hashtagsInput.validity.valid) {
           hashtagsInput.classList.remove('text__hashtags--error');
+          window.backend.save(new FormData(form), onLoad, onError);
+          evt.preventDefault();
         } else {
           hashtagsInput.classList.add('text__hashtags--error');
         }
@@ -171,6 +182,7 @@
         if (arrayHashtags.length > HASHTAGS_MAX_NUMBER) {
           hashtagsInput.setCustomValidity('Количество хештегов должно быть не больше ' + HASHTAGS_MAX_NUMBER);
         }
+
       } else {
         hashtagsInput.setCustomValidity('');
       }
@@ -179,6 +191,8 @@
     };
     var onPictureEditorClose = function () {
       pictureUpload.value = '';
+      hashtagsInput.value = '';
+      commentsInput.value = '';
       picturePreviewContainer.style.transform = '';
       picturePreview.style.filter = '';
       picturePreview.classList = '';
