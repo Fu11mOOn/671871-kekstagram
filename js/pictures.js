@@ -1,9 +1,9 @@
 'use strict';
 
 (function () {
-  var pasteUsersPictures = function () {
-    var usersPictures = window.getData();
-    var usersPicturesList = document.querySelector('.pictures');
+  var usersPicturesList = document.querySelector('.pictures');
+
+  var pasteUsersPictures = function (array) {
     var fragment = document.createDocumentFragment();
 
     var renderUserPicture = function (element) {
@@ -23,12 +23,19 @@
       return userPictureTemplate;
     };
 
-    for (var i = 0; i < usersPictures.length; i++) {
-      fragment.appendChild(renderUserPicture(usersPictures[i]));
+    for (var i = 0; i < array.length; i++) {
+      fragment.appendChild(renderUserPicture(array[i]));
     }
 
     usersPicturesList.appendChild(fragment);
   };
+  var onLoad = function (array) {
+    pasteUsersPictures(array);
+    window.utilits.removeErrorText(usersPicturesList);
+  };
+  var onError = function (errorText) {
+    window.utilits.addErrorText(errorText, usersPicturesList);
+  };
 
-  pasteUsersPictures();
+  window.backend.load(onLoad, onError);
 }());
