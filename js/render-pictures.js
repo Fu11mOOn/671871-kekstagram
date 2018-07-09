@@ -1,9 +1,9 @@
 'use strict';
 
 (function () {
-  var usersPicturesList = document.querySelector('.pictures');
-
-  var pasteUsersPictures = function (array) {
+  window.renderPictures = function (array) {
+    var usersPicturesList = document.querySelector('.pictures');
+    var pictures = document.querySelectorAll('.picture__link');
     var fragment = document.createDocumentFragment();
 
     var renderUserPicture = function (element) {
@@ -27,15 +27,9 @@
       fragment.appendChild(renderUserPicture(array[i]));
     }
 
+    pictures.forEach(function (element) {
+      element.remove();
+    });
     usersPicturesList.appendChild(fragment);
   };
-  var onLoad = function (array) {
-    pasteUsersPictures(array);
-    window.utilits.removeErrorText(usersPicturesList);
-  };
-  var onError = function (errorText) {
-    window.utilits.addErrorText(errorText, usersPicturesList);
-  };
-
-  window.backend.load(onLoad, onError);
 }());
