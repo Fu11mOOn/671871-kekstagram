@@ -8,35 +8,36 @@
   var pictures = [];
   var picturesCopy = [];
 
+  var applayFilterPopular = function () {
+    window.renderPictures(pictures);
+  };
+  var applayFilterNew = function () {
+    picturesCopy = pictures.slice().sort(function () {
+      return Math.random() - 0.5;
+    }).slice(0, NUMBER_OF_NEW_PICTURES);
+    window.renderPictures(picturesCopy);
+    picturesCopy = [];
+  };
+  var applayFilterDiscussed = function () {
+    picturesCopy = pictures.slice().sort(function (left, right) {
+      return right.comments.length - left.comments.length;
+    });
+    window.renderPictures(picturesCopy);
+    picturesCopy = [];
+  };
   window.gallery = {
-    setPopular: function () {
-      window.renderPictures(pictures);
-    },
-    setNew: function () {
-      var url = [];
-
-      for (var i = 0; i < NUMBER_OF_NEW_PICTURES; i++) {
-        while (!picturesCopy[i]) {
-          var randomPicture = pictures[window.utilits.getRandomIntegerFromInterval(0, pictures.length)];
-
-          if (!window.utilits.getNumberOfSimilarElementsAtArray(url, randomPicture.url)) {
-            picturesCopy[i] = randomPicture;
-            url[i] = randomPicture.url;
-          }
-        }
+    filter: function (filter) {
+      switch (filter) {
+        case 'filter-popular':
+          applayFilterPopular();
+          break;
+        case 'filter-new':
+          applayFilterNew();
+          break;
+        case 'filter-discussed':
+          applayFilterDiscussed();
+          break;
       }
-
-      window.renderPictures(picturesCopy);
-      url = [];
-      picturesCopy = [];
-    },
-    setDiscussed: function () {
-      picturesCopy = pictures.slice();
-      picturesCopy.sort(function (left, right) {
-        return right.comments.length - left.comments.length;
-      });
-      window.renderPictures(picturesCopy);
-      picturesCopy = [];
     }
   };
   var onLoad = function (array) {
