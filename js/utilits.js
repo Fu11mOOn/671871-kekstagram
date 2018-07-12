@@ -2,8 +2,10 @@
 
 (function () {
   var ESC_KEYCODE = 27;
+  var ERROR_CLASS = 'error-message';
+  var DEBOUNCE_INTERVAL = 500;
 
-  var errorClass = 'error-message';
+  var lastTimeout;
 
   window.utilits = {
     getRandomIntegerFromInterval: function (min, max) {
@@ -28,20 +30,32 @@
     addErrorText: function (errorText, element) {
       var lastElement = element.lastElementChild;
 
-      if (!lastElement.classList.contains(errorClass)) {
+      if (!lastElement.classList.contains(ERROR_CLASS)) {
         var text = document.createElement('p');
 
         text.textContent = errorText;
-        text.classList.add(errorClass);
+        text.classList.add(ERROR_CLASS);
         element.appendChild(text);
       }
     },
     removeErrorText: function (element) {
       var lastElement = element.lastElementChild;
 
-      if (lastElement.classList.contains(errorClass)) {
+      if (lastElement.classList.contains(ERROR_CLASS)) {
         lastElement.remove();
       }
+    },
+    removeAllChildElement: function (element) {
+      while (element.firstChild) {
+        element.removeChild(element.firstChild);
+      }
+    },
+    eliminateBounce: function (fun) {
+      if (lastTimeout) {
+        window.clearTimeout(lastTimeout);
+      }
+
+      lastTimeout = window.setTimeout(fun, DEBOUNCE_INTERVAL);
     }
   };
 }());

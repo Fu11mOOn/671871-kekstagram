@@ -1,41 +1,73 @@
 'use strict';
 
 (function () {
-  var commentCount = document.querySelector('.social__comment-count');
-  var commentLoadMore = document.querySelector('.social__loadmore');
-
   window.showPreview = function (element) {
+    var NUMBER_OF_COMMENTS = 5;
+
+    var commentsList = document.querySelector('.social__comments');
+    var commentsCount = document.querySelector('.social__comment-count');
+    var loadMoreButton = document.querySelector('.social__loadmore');
     var bigPictureCloseButton = document.querySelector('.big-picture__cancel');
     var bigPicture = document.querySelector('.big-picture');
+    var isCommentsFinish = false;
+    var isFirstOpen = true;
+    var position = {
+      start: 0,
+      end: 0
+    };
 
-    var renderBigPictureComments = function () {
-      var commentsList = document.querySelector('.social__comments');
+    var renderPreviewComments = function (array) {
       var fragment = document.createDocumentFragment();
 
-      var removePreviousComments = function () {
-        while (commentsList.children.length) {
-          commentsList.removeChild(commentsList.firstChild);
-        }
-      };
-
-      for (var i = 0; i < element.comments.length; i++) {
+      for (var i = 0; i < array.length; i++) {
         var commentTemplate = document.querySelector('.social__comment').cloneNode(true);
         var imageElement = commentTemplate.querySelector('.social__picture');
 
         commentTemplate.classList.add('social__comment--text');
         imageElement.src = 'img/avatar-' + window.utilits.getRandomIntegerFromInterval(1, 7) + '.svg';
-        commentTemplate.textContent = element.comments[i];
+        commentTemplate.textContent = array[i];
         commentTemplate.insertBefore(imageElement, commentTemplate.firstChild);
         fragment.appendChild(commentTemplate);
       }
 
-      removePreviousComments();
+      if (isFirstOpen) {
+        window.utilits.removeAllChildElement(commentsList);
+        isFirstOpen = false;
+      }
+
       commentsList.appendChild(fragment);
+    };
+    var onLoadMorePressed = function () {
+      var renderedComments = [];
+
+      position.end += NUMBER_OF_COMMENTS;
+
+      if (position.end > element.comments.length) {
+        position.end = element.comments.length;
+
+        if (position.start > element.comments.length) {
+          position.start -= NUMBER_OF_COMMENTS;
+        }
+      }
+      if (!isCommentsFinish) {
+        renderedComments = element.comments.slice(position.start, position.end);
+        renderPreviewComments(renderedComments);
+
+        if (position.end === element.comments.length) {
+          isCommentsFinish = true;
+          loadMoreButton.classList.add('hidden');
+        }
+      }
+
+      position.start += NUMBER_OF_COMMENTS;
+      commentsCount.textContent = position.end + ' из ' + element.comments.length + ' комментариев';
     };
     var onBigPictureClose = function () {
       bigPicture.classList.add('hidden');
+      loadMoreButton.classList.remove('hidden');
       bigPictureCloseButton.removeEventListener('click', onBigPictureClose);
       document.removeEventListener('keydown', onBigPictureEscPress);
+      loadMoreButton.removeEventListener('click', onLoadMorePressed);
     };
     var onBigPictureEscPress = function () {
       window.utilits.escPressed(onBigPictureClose());
@@ -44,13 +76,10 @@
     bigPicture.classList.remove('hidden');
     bigPicture.querySelector('.big-picture__img > img').src = element.url;
     bigPicture.querySelector('.likes-count').textContent = element.likes;
-    bigPicture.querySelector('.comments-count').textContent = element.comments.length;
     bigPicture.querySelector('.social__caption').textContent = element.description;
+    loadMoreButton.addEventListener('click', onLoadMorePressed);
     bigPictureCloseButton.addEventListener('click', onBigPictureClose);
     document.addEventListener('keydown', onBigPictureEscPress);
-    renderBigPictureComments();
+    onLoadMorePressed();
   };
-
-  commentCount.classList.add('visually-hidden');
-  commentLoadMore.classList.add('visually-hidden');
 }());
