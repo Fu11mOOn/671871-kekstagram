@@ -229,6 +229,7 @@
     };
 
     pictureEditor.classList.remove('hidden');
+    picturePreview.src = '';
     pictureEffects.forEach(function (element) {
       element.addEventListener('change', onEffectChange);
     });
