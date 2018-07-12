@@ -16,6 +16,7 @@
     var pictureEditorCloseButton = document.querySelector('.img-upload__cancel');
     var picturePreviewContainer = document.querySelector('.img-upload__preview');
     var picturePreview = picturePreviewContainer.querySelector('img');
+    var effectsPreviews = document.querySelectorAll('.effects__preview');
     var pictureEffects = document.querySelectorAll('.effects__radio');
     var currentEffect = document.querySelector('input[type="radio"]:checked').value;
     var sizeUpButton = document.querySelector('.resize__control--plus');
@@ -229,6 +230,10 @@
     };
 
     pictureEditor.classList.remove('hidden');
+    picturePreview.src = '';
+    effectsPreviews.forEach(function (it) {
+      it.style.backgroundImage = '';
+    });
     pictureEffects.forEach(function (element) {
       element.addEventListener('change', onEffectChange);
     });
