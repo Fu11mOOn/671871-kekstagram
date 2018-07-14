@@ -9,6 +9,7 @@
     var loadMoreButton = document.querySelector('.social__loadmore');
     var bigPictureCloseButton = document.querySelector('.big-picture__cancel');
     var bigPicture = document.querySelector('.big-picture');
+    var lastFocusedElement = document.activeElement;
     var isCommentsFinish = false;
     var isFirstOpen = true;
     var position = {
@@ -64,16 +65,20 @@
     };
     var onBigPictureClose = function () {
       bigPicture.classList.add('hidden');
+      document.body.classList.remove('modal-open');
       loadMoreButton.classList.remove('hidden');
+      lastFocusedElement.focus();
       bigPictureCloseButton.removeEventListener('click', onBigPictureClose);
       document.removeEventListener('keydown', onBigPictureEscPress);
       loadMoreButton.removeEventListener('click', onLoadMorePressed);
     };
-    var onBigPictureEscPress = function () {
-      window.utilits.escPressed(onBigPictureClose());
+    var onBigPictureEscPress = function (evt) {
+      window.utilits.escPressed(evt, onBigPictureClose);
     };
 
     bigPicture.classList.remove('hidden');
+    loadMoreButton.focus();
+    bigPicture.scrollTo(0, 0);
     bigPicture.querySelector('.big-picture__img > img').src = element.url;
     bigPicture.querySelector('.likes-count').textContent = element.likes;
     bigPicture.querySelector('.social__caption').textContent = element.description;

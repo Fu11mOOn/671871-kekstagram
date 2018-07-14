@@ -12,6 +12,7 @@
       var onUserPictureClick = function (evt) {
         evt.preventDefault();
         window.showPreview(element);
+        document.body.classList.add('modal-open');
       };
 
       userPictureTemplate.href = element.url;
