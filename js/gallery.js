@@ -5,25 +5,27 @@
 
   var usersPicturesList = document.querySelector('.pictures');
   var filters = document.querySelector('.img-filters');
-  var pictures = [];
-  var picturesCopy = [];
+  var pictures;
+  var picturesCopy;
 
   var applayFilterPopular = function () {
     window.renderPictures(pictures);
+  };
+  var setFilter = function (array) {
+    window.renderPictures(array);
+    array = [];
   };
   var applayFilterNew = function () {
     picturesCopy = pictures.slice().sort(function () {
       return Math.random() - 0.5;
     }).slice(0, NUMBER_OF_NEW_PICTURES);
-    window.renderPictures(picturesCopy);
-    picturesCopy = [];
+    setFilter(picturesCopy);
   };
   var applayFilterDiscussed = function () {
     picturesCopy = pictures.slice().sort(function (left, right) {
       return right.comments.length - left.comments.length;
     });
-    window.renderPictures(picturesCopy);
-    picturesCopy = [];
+    setFilter(picturesCopy);
   };
   window.gallery = {
     filter: function (filter) {

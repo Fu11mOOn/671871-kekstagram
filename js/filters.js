@@ -6,11 +6,15 @@
   var filters = document.querySelector('.img-filters');
 
   var classValidaty = function (element) {
-    var filtersButtons = document.querySelectorAll('.img-filters__button');
+    var filtersButtons = filters.querySelectorAll('.img-filters__button');
 
-    filtersButtons.forEach(function (it) {
-      it.classList.remove(ACTIVE_CLASS);
-    });
+    for (var i = 0; i < filtersButtons.length; i++) {
+      if (filtersButtons[i].classList.contains(ACTIVE_CLASS)) {
+        filtersButtons[i].classList.remove(ACTIVE_CLASS);
+        break;
+      }
+    }
+
     element.classList.add(ACTIVE_CLASS);
   };
 

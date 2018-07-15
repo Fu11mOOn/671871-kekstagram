@@ -24,10 +24,9 @@
       return userPictureTemplate;
     };
 
-    for (var i = 0; i < array.length; i++) {
-      fragment.appendChild(renderUserPicture(array[i]));
-    }
-
+    array.forEach(function (element) {
+      fragment.appendChild(renderUserPicture(element));
+    });
     pictures.forEach(function (element) {
       element.remove();
     });
