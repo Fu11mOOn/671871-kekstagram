@@ -5,13 +5,17 @@
 
   var filters = document.querySelector('.img-filters');
 
-  var classValidaty = function (evt) {
-    var filtersButtons = document.querySelectorAll('.img-filters__button');
+  var classValidaty = function (element) {
+    var filtersButtons = filters.querySelectorAll('.img-filters__button');
 
-    filtersButtons.forEach(function (element) {
-      element.classList.remove(ACTIVE_CLASS);
-    });
-    evt.target.classList.add(ACTIVE_CLASS);
+    for (var i = 0; i < filtersButtons.length; i++) {
+      if (filtersButtons[i].classList.contains(ACTIVE_CLASS)) {
+        filtersButtons[i].classList.remove(ACTIVE_CLASS);
+        break;
+      }
+    }
+
+    element.classList.add(ACTIVE_CLASS);
   };
 
   filters.addEventListener('click', function (evt) {
